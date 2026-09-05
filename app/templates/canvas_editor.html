@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Edit canvas · YouTube Research Canvas{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-[1600px] px-5 py-8 lg:px-8">
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">Markdown editor</p>
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight">Edit research canvas</h1>
+      <p class="mt-2 max-w-3xl text-sm leading-6 text-stone-600">
+        This editable document replaces the generated analysis view. Saved transcripts remain unchanged.
+      </p>
+    </div>
+    <a href="/runs/{{ view.run.id }}" class="inline-flex rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-50">
+      Back to canvas
+    </a>
+  </div>
+
+  {% if error %}
+  <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="post" action="/runs/{{ view.run.id }}/content">
+    <div class="grid overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm xl:grid-cols-2">
+      <section class="border-b border-stone-200 xl:border-r xl:border-b-0">
+        <div class="flex items-center justify-between border-b border-stone-200 bg-stone-50 px-5 py-3">
+          <h2 class="text-sm font-semibold text-stone-800">Markdown</h2>
+          <span class="text-xs text-stone-400">Write</span>
+        </div>
+        <label for="markdown_text" class="sr-only">Canvas Markdown</label>
+        <textarea
+          id="markdown_text"
+          name="markdown_text"
+          spellcheck="true"
+          class="min-h-[65vh] w-full resize-y border-0 bg-white p-5 font-mono text-sm leading-6 text-stone-800 outline-none focus:ring-2 focus:ring-inset focus:ring-amber-400"
+        >{{ markdown_text }}</textarea>
+      </section>
+
+      <section>
+        <div class="flex items-center justify-between border-b border-stone-200 bg-stone-50 px-5 py-3">
+          <h2 class="text-sm font-semibold text-stone-800">Preview</h2>
+          <span class="text-xs text-stone-400">Server rendered</span>
+        </div>
+        <article class="markdown-body min-h-[65vh] overflow-y-auto p-6 lg:p-8">
+          {{ preview_html|safe }}
+        </article>
+      </section>
+    </div>
+
+    <div class="mt-5 flex flex-wrap items-center justify-end gap-3">
+      <a href="/runs/{{ view.run.id }}" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-stone-600 hover:bg-stone-200">Cancel</a>
+      <button
+        type="submit"
+        formaction="/runs/{{ view.run.id }}/preview"
+        class="rounded-xl border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+      >
+        Refresh preview
+      </button>
+      <button type="submit" class="rounded-xl bg-stone-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800">
+        Save changes
+      </button>
+    </div>
+  </form>
+</section>
+{% endblock %}
