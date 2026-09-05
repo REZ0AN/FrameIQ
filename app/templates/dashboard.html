@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · YouTube Research Canvas{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-7xl px-5 py-10 lg:px-8 lg:py-14">
+  <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.22em] text-amber-700">Personal workspace</p>
+      <h1 class="mt-3 text-4xl font-semibold tracking-tight text-stone-950">Research dashboard</h1>
+      <p class="mt-3 max-w-2xl text-base leading-7 text-stone-600">
+        Reopen previous canvases and browse the transcripts already cached in SQLite.
+      </p>
+    </div>
+    <a href="/" class="inline-flex shrink-0 items-center justify-center rounded-xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300">
+      New canvas
+    </a>
+  </div>
+
+  {% if deleted %}
+  <div class="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900">
+    Canvas deleted. Transcripts still used by another canvas were kept.
+  </div>
+  {% endif %}
+
+  <div class="mt-10 grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
+    <section>
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-xl font-semibold tracking-tight">Recent canvases</h2>
+        <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-500 shadow-sm">
+          {{ view.runs|length }} shown
+        </span>
+      </div>
+
+      {% if view.runs %}
+      <div class="space-y-4">
+        {% for run in view.runs %}
+        <article class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-stone-300 hover:shadow-md">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide
+                  {% if run.status.value == 'completed' %}bg-emerald-100 text-emerald-800
+                  {% elif run.status.value == 'completed_with_errors' %}bg-amber-100 text-amber-800
+                  {% elif run.status.value in ['failed', 'interrupted'] %}bg-red-100 text-red-800
+                  {% else %}bg-sky-100 text-sky-800{% endif %}">
+                  {{ run.status.value|replace('_', ' ') }}
+                </span>
+                <span class="text-xs font-medium uppercase tracking-wide text-stone-400">{{ run.mode.value }}</span>
+              </div>
+              <a href="/runs/{{ run.id }}" class="mt-3 block break-words text-sm font-medium leading-6 text-stone-800 hover:text-amber-700">{{ run.input_value }}</a>
+              {% if run.error %}
+              <p class="mt-2 line-clamp-2 text-sm leading-6 text-red-700">{{ run.error }}</p>
+              {% endif %}
+            </div>
+            <div class="shrink-0 text-left sm:text-right">
+              <p class="text-sm font-medium text-stone-700">{{ run.success_count + run.error_count }} / {{ run.total_count }} videos</p>
+              <p class="mt-1 text-xs text-stone-400">{{ run.created_at.strftime('%b %d, %Y · %H:%M') }}</p>
+            </div>
+          </div>
+          <div class="mt-4 flex flex-wrap items-center gap-3 border-t border-stone-100 pt-4 text-sm font-semibold">
+            <a href="/runs/{{ run.id }}" class="text-stone-900 hover:text-amber-700">Open canvas</a>
+            {% if run.status.terminal %}
+            <a href="/runs/{{ run.id }}/edit" class="text-stone-500 hover:text-stone-900">Edit Markdown</a>
+            <form method="post" action="/runs/{{ run.id }}/delete" class="ml-auto" onsubmit="return confirm('Delete this canvas? Transcripts used by no other canvas will also be deleted.');">
+              <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
+            </form>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="rounded-3xl border border-dashed border-stone-300 bg-white/60 px-6 py-14 text-center">
+        <h3 class="text-lg font-semibold">No canvases yet</h3>
+        <p class="mt-2 text-sm text-stone-500">Submit a YouTube URL to create your first research canvas.</p>
+        <a href="/" class="mt-6 inline-flex rounded-xl bg-stone-950 px-4 py-2.5 text-sm font-semibold text-white">Create a canvas</a>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-xl font-semibold tracking-tight">Saved transcripts</h2>
+        <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-500 shadow-sm">
+          {{ view.transcripts|length }} shown
+        </span>
+      </div>
+
+      {% if view.transcripts %}
+      <div class="space-y-4">
+        {% for transcript in view.transcripts %}
+        <article class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h3 class="font-semibold leading-6 text-stone-900">{{ transcript.title }}</h3>
+              <p class="mt-1 font-mono text-xs text-stone-400">{{ transcript.video_id }}</p>
+            </div>
+            <span class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold uppercase text-amber-800">
+              {{ transcript.language }}
+            </span>
+          </div>
+          <p class="mt-3 text-xs text-stone-500">{{ transcript.provider }} · {{ transcript.created_at.strftime('%b %d, %Y') }}</p>
+          <div class="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+            {% if transcript.latest_run_id %}
+            <a href="/runs/{{ transcript.latest_run_id }}#transcripts" class="text-stone-900 hover:text-amber-700">Open transcript</a>
+            {% endif %}
+            <a href="{{ transcript.canonical_url }}" target="_blank" rel="noopener noreferrer" class="text-stone-500 hover:text-stone-900">YouTube ↗</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="rounded-3xl border border-dashed border-stone-300 bg-white/60 px-6 py-12 text-center">
+        <p class="text-sm text-stone-500">Transcripts appear here after a successful caption fetch.</p>
+      </div>
+      {% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %}
