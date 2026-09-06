@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}New analysis · YouTube Research Canvas{% endblock %}
+
+{% block content %}
+<section class="mx-auto flex min-h-[calc(100vh-73px)] max-w-5xl items-center px-5 py-16 lg:px-8">
+  <div class="grid w-full gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+    <div>
+      <p class="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-amber-700">
+        Transcript to insight
+      </p>
+      <h1 class="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-stone-950 sm:text-6xl">
+        Turn YouTube videos into a research canvas.
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg leading-8 text-stone-600">
+        Paste one URL or a comma-separated batch. The app retrieves captions,
+        reuses saved transcripts, and builds an evidence-aware analysis.
+      </p>
+    </div>
+
+    <form method="post" action="/runs" class="rounded-3xl border border-stone-200 bg-white p-6 shadow-xl shadow-stone-200/60 sm:p-8">
+      <label for="urls" class="block text-sm font-semibold text-stone-800">
+        YouTube URL or video ID
+      </label>
+      <p class="mt-1 text-sm leading-6 text-stone-500">
+        Separate up to ten videos with commas.
+      </p>
+      <textarea
+        id="urls"
+        name="urls"
+        rows="6"
+        required
+        autofocus
+        placeholder="https://www.youtube.com/watch?v=..."
+        class="mt-4 block w-full resize-none rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm leading-6 outline-none transition placeholder:text-stone-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-100"
+      >{{ value }}</textarea>
+      {% if error %}
+      <p role="alert" class="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+        {{ error }}
+      </p>
+      {% endif %}
+      <button type="submit" class="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 focus:outline-none focus:ring-4 focus:ring-stone-300">
+        Build research canvas
+      </button>
+      <p class="mt-4 text-center text-xs leading-5 text-stone-400">
+        Caption availability depends on YouTube. English, Hindi, and Bangla are preferred.
+      </p>
+    </form>
+  </div>
+</section>
+{% endblock %}
